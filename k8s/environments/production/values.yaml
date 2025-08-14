@@ -1,0 +1,63 @@
+# Default values for app-gateway.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: ghcr.io/finure/app-gateway
+  tag: 0.1.0
+  pullPolicy: IfNotPresent
+secretName: "finure-app"
+gateway:
+  replicas: 1
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+podAnnotations: {}
+podLabels: {}
+imagePullSecrets: 
+  - name: "ghcr"
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: 
+    iam.gke.io/gcp-service-account: app-gateway@finure-465001.iam.gserviceaccount.com
+  name: "app-gateway"
+
+volumes: 
+  - name: kafka-certs
+    secret:
+      secretName: "kafka"
+  - name: kafka-ca
+    secret:
+      secretName: "finure-cluster-ca-cert"
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: 
+  - name: kafka-certs
+    mountPath: /etc/kafka/secrets
+    readOnly: true
+  - name: kafka-ca
+    mountPath: /etc/kafka/ca
+    readOnly: true
+
+livenessProbe:
+  exec:
+    command: ["python", "/app/kafka-check.py"]
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+readinessProbe:
+  exec:
+    command: ["python", "/app/kafka-check.py"]
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+service:
+  type: ClusterIP
+  port: 5000
