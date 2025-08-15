@@ -42,7 +42,6 @@ class ApplicationForm(BaseModel):
     employed: bool
     credit_score: int
     loan_amount: int
-    approved: bool
 
 
 app = FastAPI()
