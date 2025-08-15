@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from confluent_kafka import Producer
 import os
+from uuid import UUID
 
 
 def read_secret(path):
@@ -35,24 +36,13 @@ producer = Producer(producer_conf)
 
 
 class ApplicationForm(BaseModel):
-    id: int
-    code_gender: str
-    flag_own_car: str
-    flag_own_realty: str
-    cnt_children: int
-    amt_income_total: float
-    name_income_type: str
-    name_education_type: str
-    name_family_status: str
-    name_housing_type: str
-    days_birth: int
-    days_employed: int
-    flag_mobil: int
-    flag_work_phone: int
-    flag_phone: int
-    flag_email: int
-    occupation_type: str
-    cnt_fam_members: float
+    id: UUID
+    age: int
+    income: int
+    employed: bool
+    credit_score: int
+    loan_amount: int
+    approved: bool
 
 
 app = FastAPI()
@@ -68,7 +58,11 @@ app.add_middleware(
 async def apply(form: ApplicationForm):
     print("Received payload from TS:", form.dict())
     try:
-        producer.produce(KAFKA_TOPIC, form.json().encode("utf-8"))
+        producer.produce(
+            KAFKA_TOPIC,
+            key=str(form.id),
+            value=form.json().encode("utf-8")
+        )
         producer.flush()
         return {"status": "ok"}
     except Exception as e:
