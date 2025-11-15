@@ -55,3 +55,5 @@ readinessProbe:
 service:
   type: ClusterIP
   port: 5000
+hosts:
+  - api-finure.clokesh.me
