@@ -1,0 +1,51 @@
+{{- if .Values.gateway.progressive.enabled }}
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: {{ include "app-gateway.fullname" . }}
+  labels:
+    {{- include "app-gateway.labels" . | nindent 4 }}
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "app-gateway.fullname" . }}
+  progressDeadlineSeconds: {{ .Values.gateway.progressive.progressDeadline }}
+  autoscalerRef:
+    apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    name: {{ include "app-gateway.fullname" . }}
+  service:
+    port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.port }}
+    gateways:
+      - istio-system/gateway
+    hosts:
+      {{- range .Values.hosts }}
+      - {{ . | quote }}
+      {{- end }}
+    trafficPolicy:
+      tls:
+        mode: ISTIO_MUTUAL
+  analysis:
+    interval: {{ .Values.gateway.progressive.analysisInterval }}
+    iterations: {{ .Values.gateway.progressive.iterations }}
+    threshold: {{ .Values.gateway.progressive.failureThreshold }}
+    metrics:
+      - name: request-success-rate
+        thresholdRange:
+          min: {{ .Values.gateway.progressive.successThreshold }}
+        interval: {{ .Values.gateway.progressive.analysisPeriod }}
+    webhooks:
+      - name: smoke-tests
+        type: pre-rollout
+        url: http://flagger-loadtester.flagger-system
+        timeout: 30s
+        metadata:
+          cmd: "curl -f -m 5 http://app-gateway-canary.ai"
+      - name: load-test
+        url: http://flagger-loadtester.flagger-system
+        timeout: 30s
+        metadata:
+          cmd: "hey -z 20s -q 10 -c 2 http://app-gateway-canary.ai"
+{{- end }}

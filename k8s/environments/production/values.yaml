@@ -15,6 +15,14 @@ gateway:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
+  progressive:
+    enabled: true
+    progressDeadline: 60
+    iterations: 5
+    failureThreshold: 2
+    analysisInterval: 1m
+    successThreshold: 99
+    analysisPeriod: 2m
 podAnnotations: {}
 podLabels: {}
 imagePullSecrets:
