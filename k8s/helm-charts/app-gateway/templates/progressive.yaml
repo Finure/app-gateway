@@ -42,10 +42,10 @@ spec:
         url: http://flagger-loadtester.flagger-system
         timeout: 30s
         metadata:
-          cmd: "curl -f -m 5 http://app-gateway-canary.ai"
+          cmd: "curl -f -m 5 http://app-gateway-canary.ai:5000"
       - name: load-test
         url: http://flagger-loadtester.flagger-system
         timeout: 30s
         metadata:
-          cmd: "hey -z 20s -q 10 -c 2 http://app-gateway-canary.ai"
+          cmd: "hey -z 20s -q 10 -c 2 http://app-gateway-canary.ai:5000"
 {{- end }}

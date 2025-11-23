@@ -10,6 +10,8 @@ App Gateway is the API gateway for the Finure platform, acting as the main entry
 - **Kubernetes Native:** Runs as a Deployment in a k8s cluster, with Helm charts for deployment and configuration
 - **Health Checks:** Includes a Kafka readiness probe script for liveness/readiness checks
 - **Environment Configuration:** Supports environment-specific values for flexible deployments
+- **Kubernetes Gateway API:** Uses Kubernetes Gateway API with Istio Controller
+- **Blue/Green Progressive Delivery:** Leverages Flagger for Blue/Green progressive delivery with smoke and load tests
 
 ## 3. Prerequisites
 - Kubernetes cluster bootstrapped ([Finure Terraform](https://github.com/finure/terraform))
@@ -37,10 +39,12 @@ app-gateway/
 │   │       ├── Chart.yaml     # Helm chart metadata
 │   │       ├── values.yaml    # Default Helm values
 │   │       └── templates/
-│   │           ├── _helpers.tpl      # Helm template helpers
-│   │           ├── deployment.yaml   # Kubernetes Deployment manifest
-│   │           ├── hpa.yaml          # Horizontal Pod Autoscaler
-│   │           ├── service.yaml      # Service definition
+│   │           ├── _helpers.tpl        # Helm template helpers
+│   │           ├── deployment.yaml     # Kubernetes Deployment manifest
+│   │           ├── hpa.yaml            # Horizontal Pod Autoscaler
+│   │           ├── service.yaml        # Service definition
+│   │           ├── ingress.yaml        # HTTP Route definition for ingress
+│   │           ├── progressive.yaml    # Flagger for Blue/Green progessive delivery
 │   │           └── serviceaccount.yaml # Service account for gateway
 │   └── scripts/
 │       └── istio.sh           # Istio graceful exit script
